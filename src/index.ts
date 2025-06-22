@@ -2,8 +2,11 @@ import { Hono } from "hono";
 import { apiCall } from "./apicall";
 import { isValidInteger } from "./utils";
 import { getUDID } from "./get_udid";
+import { cors } from "hono/cors";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
+
+app.use("*", cors({ origin: "*" }));
 
 app.get("/search", async (c) => {
     const query = c.req.query("q");
