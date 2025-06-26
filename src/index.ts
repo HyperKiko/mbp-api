@@ -100,18 +100,14 @@ app.get("/tv/:id/:season/:episode", async (c) => {
     const season = Number(season_str);
     const episode = Number(episode_str);
 
-    const data = await apiCall({
+    return c.json(await apiCall({
         module: "TV_downloadurl_v3",
         tid: id,
         season,
         episode,
         uid: c.env.MBP_TOKEN,
         open_udid: getUDID(c.env.MBP_TOKEN)
-    });
-    delete data.data.ip;
-    delete data.data.hostname;
-
-    return c.json(data);
+    }));
 });
 
 app.get("/movie/:id", async (c) => {
@@ -123,15 +119,12 @@ app.get("/movie/:id", async (c) => {
         );
     const id = Number(id_str);
 
-    const data = await apiCall({
+    return c.json(await apiCall({
         module: "Movie_downloadurl_v3",
         mid: id,
         uid: c.env.MBP_TOKEN,
         open_udid: getUDID(c.env.MBP_TOKEN)
-    });
-    delete data.data.ip;
-
-    return c.json(data);
+    }));
 });
 
 app.get("/subtitles/tv/:id/:season/:episode/:stream", async (c) => {
