@@ -1,1 +1,2 @@
 MBP_TOKEN=get_from_ui_cookie_on_website
+CORS_ORIGINS=comma_separated_array

@@ -6,7 +6,9 @@ import { cors } from "hono/cors";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
-app.use("*", cors({ origin: "*" }));
+app.use("*", (c, next) =>
+    cors({ origin: c.env.CORS_ORIGINS.split(",") })(c, next)
+);
 
 app.get("/search", async (c) => {
     const query = c.req.query("q");
@@ -100,14 +102,16 @@ app.get("/tv/:id/:season/:episode", async (c) => {
     const season = Number(season_str);
     const episode = Number(episode_str);
 
-    return c.json(await apiCall({
-        module: "TV_downloadurl_v3",
-        tid: id,
-        season,
-        episode,
-        uid: c.env.MBP_TOKEN,
-        open_udid: getUDID(c.env.MBP_TOKEN)
-    }));
+    return c.json(
+        await apiCall({
+            module: "TV_downloadurl_v3",
+            tid: id,
+            season,
+            episode,
+            uid: c.env.MBP_TOKEN,
+            open_udid: getUDID(c.env.MBP_TOKEN)
+        })
+    );
 });
 
 app.get("/movie/:id", async (c) => {
@@ -119,12 +123,14 @@ app.get("/movie/:id", async (c) => {
         );
     const id = Number(id_str);
 
-    return c.json(await apiCall({
-        module: "Movie_downloadurl_v3",
-        mid: id,
-        uid: c.env.MBP_TOKEN,
-        open_udid: getUDID(c.env.MBP_TOKEN)
-    }));
+    return c.json(
+        await apiCall({
+            module: "Movie_downloadurl_v3",
+            mid: id,
+            uid: c.env.MBP_TOKEN,
+            open_udid: getUDID(c.env.MBP_TOKEN)
+        })
+    );
 });
 
 app.get("/subtitles/tv/:id/:season/:episode/:stream", async (c) => {
