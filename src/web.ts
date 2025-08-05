@@ -19,6 +19,23 @@ export default async function scrapeHTML(
                     );
                     const cheerioEl = $(el);
                     const secondEl = $(cheerioEl.find("> div")[1]);
+                    const original_mmfid = Number(
+                        new URLSearchParams(el.attribs.app_url).get("mp4_id")
+                    );
+                    const fid = Number(url.searchParams.values().next().value);
+                    const bitstream = cheerioEl
+                        .find(".speed > span")
+                        .text()
+                        .trim();
+                    const filename = secondEl.find("> span").text().trim();
+                    const dateline = Math.floor(
+                        new Date(
+                            secondEl.find("> p > span").first().text().trim()
+                        ).getTime() / 1000
+                    );
+                    const size = $(secondEl.find("> p > span")[1])
+                        .text()
+                        .trim();
                     return fetch(url, {
                         headers: {
                             "User-Agent": USER_AGENT,
@@ -33,57 +50,39 @@ export default async function scrapeHTML(
                                         text
                                     )?.[1] || "[]"
                                 ) as any[]
-                            ).map((stream) =>
-                                stream.sources.map((source: any) => ({
-                                    ...Object.fromEntries(
-                                        Array.from(url.searchParams).map(
-                                            ([key, value]) => [
-                                                key,
-                                                Number(value)
-                                            ]
-                                        )
-                                    ),
-                                    bitstream: cheerioEl
-                                        .find(".speed > span")
-                                        .text()
-                                        .trim(),
-                                    quality: stream.name.replace(" HDR", ""),
-                                    real_quality: stream.name.replace(
-                                        " HDR",
-                                        ""
-                                    ),
-                                    mmfid: Number(
-                                        new URLSearchParams(
-                                            el.attribs.app_url
-                                        ).get("mp4_id")
-                                    ),
-                                    filename: secondEl
-                                        .find("> span")
-                                        .text()
-                                        .trim(),
-                                    dateline: Math.floor(
-                                        new Date(
-                                            secondEl
-                                                .find("> p > span")
-                                                .first()
-                                                .text()
-                                                .trim()
-                                        ).getTime() / 1000
-                                    ),
-                                    size: $(secondEl.find("> p > span")[1])
-                                        .text()
-                                        .trim(),
-                                    original: 0,
-                                    hdr: Number(stream.name.endsWith(" HDR")),
-                                    path:
-                                        source.src !==
-                                        "/static/video/vip_only.mp4"
-                                            ? source.src
-                                            : "",
-                                    format: source.type.split("/")[1],
-                                    mp4_id: source.mp4_id
-                                }))
-                            )
+                            ).map((stream) => {
+                                const real_quality = stream.name.replace(
+                                    " HDR",
+                                    ""
+                                );
+                                const hdr = Number(
+                                    stream.name.endsWith(" HDR")
+                                );
+                                return stream.sources.map((source: any) => {
+                                    const original = source.mp4_id === original_mmfid;
+                                    return {
+                                        fid,
+                                        bitstream,
+                                        quality: original
+                                            ? "org"
+                                            : real_quality,
+                                        real_quality,
+                                        mmfid: source.mp4_id,
+                                        original_mmfid,
+                                        filename,
+                                        dateline,
+                                        size,
+                                        original,
+                                        hdr,
+                                        path:
+                                            source.src !==
+                                            "/static/video/vip_only.mp4"
+                                                ? source.src
+                                                : "",
+                                        format: source.type.split("/")[1]
+                                    };
+                                });
+                            })
                         );
                 })
                 .toArray()
