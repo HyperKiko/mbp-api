@@ -59,7 +59,7 @@ export default async function scrapeHTML(
                                     stream.name.endsWith(" HDR")
                                 );
                                 return stream.sources.map((source: any) => {
-                                    const original = source.mp4_id === original_mmfid;
+                                    const original = Number(source.mp4_id === original_mmfid);
                                     return {
                                         fid,
                                         bitstream,
