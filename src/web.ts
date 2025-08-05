@@ -79,7 +79,8 @@ export default async function scrapeHTML(
                                             "/static/video/vip_only.mp4"
                                                 ? source.src
                                                 : "",
-                                        format: source.type.split("/")[1]
+                                        format: source.type.split("/")[1],
+                                        h265: source.h265
                                     };
                                 });
                             })
